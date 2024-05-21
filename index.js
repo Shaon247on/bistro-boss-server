@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 require('dotenv').config()
 const cors = require('cors');
@@ -32,7 +32,35 @@ async function run() {
 
     const menuCollection = client.db('bistroDB').collection('menu')
     const reviewCollection = client.db('bistroDB').collection('reviews')
+    const cartsCollection = client.db('bistroDB').collection('carts')
 
+
+    // update cart count
+
+    app.post('/carts', async(req, res)=>{
+      const cartItem = req.body
+      const result = await cartsCollection.insertOne(cartItem)
+      res.send(result)
+    })
+
+    //get user carted item
+    
+    app.get("/carts", async(req,res)=>{
+      const email = req.query.email
+      const query = {email: email}
+      const result = await cartsCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    //delete a single cart item
+
+    app.delete('/carts/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      console.log(query)
+      const result = await cartsCollection.deleteOne(query)
+      res.send(result)
+    })
 
     //to get all data of menu from mongoDB
 
@@ -66,3 +94,15 @@ app.get('/', (req, res)=>{
 app.listen(port, ()=>{
     console.log(`bistro boss is sitting ${port}`)
 })
+
+
+/**
+ *                ---------------------
+ *                  NAMING CONVENTION
+ *                ---------------------
+ * app.get('/users')
+ * app.get
+ * 
+ * 
+ * 
+*/
